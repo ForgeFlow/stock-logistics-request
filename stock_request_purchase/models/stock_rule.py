@@ -16,3 +16,32 @@ class StockRule(models.Model):
         if "stock_request_id" in values:
             vals["stock_request_ids"] = [(4, values["stock_request_id"])]
         return vals
+
+    def _prepare_procurement_values(
+        self,
+        product_id,
+        product_qty,
+        product_uom,
+        location_id,
+        name,
+        origin,
+        company_id,
+        values,
+    ):
+        """Ensure stock_request_id propagates through procurement chain"""
+        procurement_values = super()._prepare_procurement_values(
+            product_id,
+            product_qty,
+            product_uom,
+            location_id,
+            name,
+            origin,
+            company_id,
+            values,
+        )
+
+        # Critical: Preserve stock_request_id for multi-step routes
+        if "stock_request_id" in values:
+            procurement_values["stock_request_id"] = values["stock_request_id"]
+
+        return procurement_values
